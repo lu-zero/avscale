@@ -17,6 +17,8 @@ typedef struct AVChromaton {
     int next; // offset to the next element - e.g. 2 for Y and 4 for U and V in YUYV
 } AVChromaton;
 
+#define AVPF_FLAG_BE 0x00000001
+
 typedef struct AVPixelFormaton {
     const char *name; //maybe
     enum { AVS_GREY, AVS_RGB, AVS_YUV, AVS_XYZ, AVS_LAB, AVS_CMYK } colourspace;
@@ -81,5 +83,7 @@ int avs_get_component_stride(AVFrame *src, int component_id);
 int avs_build_chain(AVSContext *ctx, AVFrame *src, AVFrame *dst);
 
 int avs_process_frame(AVSContext *ctx, AVFrame *src, AVFrame *dst);
+
+void avs_cleanup(AVSContext *ctx);
 
 #endif /* AVSCALE_H */

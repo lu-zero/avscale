@@ -70,6 +70,14 @@ int avs_build_chain(AVSContext *ctx, AVFrame *src, AVFrame *dst)
             !ctx->dstfmt->component_desc[0].packed) {
             if ((ret = prepare_next_stage(ctx, &stage, "rgbunp")) < 0)
                 return ret;
+        } else if (ctx->srcfmt->entry_size != ctx->dstfmt->entry_size) {
+            if ((ret = prepare_next_stage(ctx, &stage, "rgbunp")) < 0)
+                return ret;
+            if (ctx->cur_w != ctx->dst_w || ctx->cur_h != ctx->dst_h)
+                if ((ret = prepare_next_stage(ctx, &stage, "scale")) < 0)
+                    return ret;
+            if ((ret = prepare_next_stage(ctx, &stage, "rgbpck")) < 0)
+                return ret;
         } else {
             if ((ret = prepare_next_stage(ctx, &stage, "murder")) < 0)
                 return ret;
@@ -79,8 +87,11 @@ int avs_build_chain(AVSContext *ctx, AVFrame *src, AVFrame *dst)
         if ((ret = prepare_next_stage(ctx, &stage, "rgbunp")) < 0)
             return ret;
         if (ctx->cur_w != ctx->dst_w || ctx->cur_h != ctx->dst_h)
+{
             if ((ret = prepare_next_stage(ctx, &stage, "scale")) < 0)
                 return ret;
+printf("scale init ret = %d\n",ret);
+}
         if ((ret = prepare_next_stage(ctx, &stage, "rgb2yuv")) < 0)
             return ret;
     } else
@@ -109,6 +120,7 @@ int avs_process_frame(AVSContext *ctx, AVFrame *srcf, AVFrame *dstf)
     if (!ctx->head) {
         if ((ret = avs_build_chain(ctx, srcf, dstf)) < 0)
             return ret;
+printf("build chain ret = %d\n",ret);
     }
 
     stage = ctx->head;
@@ -151,4 +163,23 @@ int avs_process_frame(AVSContext *ctx, AVFrame *srcf, AVFrame *dstf)
         }
         stage = stage->next;
     }
+}
+
+void avs_cleanup(AVSContext *ctx)
+{
+    AVSFilterStage *s, *next;
+
+    if (!ctx)
+        return;
+
+    s = ctx->head;
+
+    while (s) {
+        next = s->next;
+        if (s->deinit)
+            s->deinit(s);
+        av_free(s);
+        s = next;
+    }
+    ctx->head = ctx->tail = 0;
 }

@@ -2,6 +2,7 @@
 #include <string.h>
 #include "kernels.h"
 
+extern const AVSKernel avs_rgbpck_kernel;
 extern const AVSKernel avs_rgbunp_kernel;
 extern const AVSKernel avs_rgb2yuv_kernel;
 extern const AVSKernel avs_scale_kernel;
@@ -34,6 +35,7 @@ static const AVSKernel avs_murder_kernel = {
 
 static const AVSKernel* avs_kernels[] = {
     &avs_murder_kernel,
+    &avs_rgbpck_kernel,
     &avs_rgbunp_kernel,
     &avs_rgb2yuv_kernel,
     &avs_scale_kernel,

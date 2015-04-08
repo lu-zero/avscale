@@ -43,6 +43,8 @@ static int scale_kernel_init(AVSContext *ctx, const AVSKernel *kern, AVSFilterSt
     ScaleContext *sc;
     int i, n, dstride;
     n = ctx->dstfmt->components;
+    if (ctx->cur_fmt.component_desc[0].bpp > 8){printf("returning %d\n",AVERROR(ENOSYS));
+        return AVERROR(ENOSYS);}
     for (i = 0; i < n; i++) {
         stage->do_component[i] = component_scale;
 
